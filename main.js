@@ -1,16 +1,12 @@
 #! /usr/bin/env node
+// Import dependencies
 import { program } from "commander";
 import { config } from "dotenv";
-import { setTimeout } from "timers/promises";
 import {
-  submitQuestionDocuments,
-  submitQuestionGeneralGPT
-} from "./libraries/azureHelpers.js";
-import {
+  getApprovedAnswers,
   getQuestions,
   loginDrupal,
-  logoutDrupal,
-  post2Drupal
+  logoutDrupal
 } from "./libraries/drupalHelpers.js";
 
 // Load environment variables
@@ -18,20 +14,45 @@ config({ path: "/etc/gptbot/.env" });
 
 // Constants
 const drupalUrl = process.env.DRUPAL_BASE_URL;
-const azBaseUrl = process.env.AZ_BASE_URL;
-const azApiKey = process.env.AZ_API_KEY;
-const azSearchUrl = process.env.AZ_SEARCH_URL;
-const azSearchKey = process.env.AZ_SEARCH_KEY;
-const azIndexName = process.env.AZ_INDEX_NAME;
-const azPMIndexName = process.env.AZ_PM_INDEX_NAME;
 const uname = process.env.DRUPAL_USERNAME;
 const pword = process.env.DRUPAL_PASSWORD;
 
 // * Globals
 let Cookie, csrf_token, logout_token;
 
+// * Functions
+
+const getVettedAnswers = async () => {
+  const { Cookie, csrf_token, logout_token } = await loginDrupal(
+    drupalUrl,
+    uname,
+    pword
+  );
+
+  console.log("Logged in.");
+  const answers = await getApprovedAnswers(drupalUrl, csrf_token);
+  console.log("Got answers.");
+  console.log(answers.length);
+
+  await logoutDrupal(drupalUrl, logout_token);
+
+  await console.log(answers);
+};
+
 /**
  *
  * Main Program
+ *
+ */
+
+// program
+//   .command("dump-answers")
+//   .description("Process the questions.")
+//   .action(getVettedAnswers);
+
+getVettedAnswers();
+/**
+ *
+ * End of Program
  *
  */
