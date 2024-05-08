@@ -70,6 +70,25 @@ export const getQuestions = async (u, csrf) => {
   return questions;
 };
 
+export const getApprovedAnswers = async (u, csrf) => {
+  let url = u + "/export_faq?_format=json";
+
+  let headersList = {
+    Accept: "*/*",
+    "Content-Type": "application/json",
+    "X-CSRF-Token": csrf
+  };
+
+  let response = await fetch(url, {
+    method: "GET",
+    headers: headersList
+  });
+
+  const answers = await response.json();
+
+  return answers;
+};
+
 /**
  * Updates a Drupal node with the provided information.
  *
