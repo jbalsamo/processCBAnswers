@@ -8,6 +8,11 @@ import {
   loginDrupal,
   logoutDrupal
 } from "./libraries/drupalHelpers.js";
+import {
+  getAttributeValues,
+  getFilteredArray,
+  getStreamWriter
+} from "./libraries/helpers.js";
 
 // Load environment variables
 config({ path: "/etc/gptbot/.env" });
@@ -31,12 +36,10 @@ const getVettedAnswers = async () => {
 
   console.log("Logged in.");
   const answers = await getApprovedAnswers(drupalUrl, csrf_token);
-  console.log("Got answers.");
-  console.log(answers.length);
 
   await logoutDrupal(drupalUrl, logout_token);
 
-  await console.log(answers);
+  return answers;
 };
 
 /**
@@ -45,12 +48,38 @@ const getVettedAnswers = async () => {
  *
  */
 
-// program
-//   .command("dump-answers")
-//   .description("Process the questions.")
-//   .action(getVettedAnswers);
+program
+  .command("dump-answers")
+  .description("Process the questions.")
+  .action(async () => {
+    console.log("Dumping answers.");
 
-getVettedAnswers();
+    const answers = await getVettedAnswers();
+
+    let categories = await getAttributeValues(answers, "field_category");
+
+    categories.forEach((category) => {
+      let filteredAnswers = getFilteredArray(
+        answers,
+        "field_category",
+        category
+      );
+
+      let filename = `./data/${category}.txt`;
+      let fileStream = getStreamWriter(filename, "w", "0666");
+
+      filteredAnswers.forEach((answer) => {
+        fileStream.write("---" + "\n");
+        fileStream.write("nid: " + answer.nid + "\n");
+        fileStream.write("category: " + answer.field_category + "\n");
+        fileStream.write("question: " + answer.field_enter_question + "\n");
+      });
+      fileStream.end();
+    });
+  });
+
+program.parse(process.argv);
+
 /**
  *
  * End of Program
