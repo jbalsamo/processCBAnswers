@@ -28,6 +28,11 @@ let Cookie, csrf_token, logout_token;
 
 // * Functions
 
+/**
+ * Retrieves vetted answers after logging in and logging out of Drupal.
+ *
+ * @return {Array} The vetted answers fetched from Drupal.
+ */
 const getVettedAnswers = async () => {
   const { Cookie, csrf_token, logout_token } = await loginDrupal(
     drupalUrl,
