@@ -56,3 +56,27 @@ export const getStreamWriter = (filename, flag, mode) => {
     mode: mode
   });
 };
+
+/**
+ * Chooses the first non-blank attribute from a JSON objects list of
+ * attributes.
+ *
+ * @param {Object} obj - The JSON object to search.
+ * @return {string} The value of the first non-blank attribute found.
+ */
+export const selectedAnswer = (obj) => {
+  const attributes = [
+    "views_conditional_field",
+    "views_conditional_field_1",
+    "views_conditional_field_2",
+    "views_conditional_field_3"
+  ];
+
+  for (let attribute of attributes) {
+    if (obj[attribute] && obj[attribute].trim() !== "") {
+      return obj[attribute];
+    }
+  }
+
+  return "";
+};

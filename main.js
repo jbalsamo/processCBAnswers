@@ -11,7 +11,8 @@ import {
 import {
   getAttributeValues,
   getFilteredArray,
-  getStreamWriter
+  getStreamWriter,
+  selectedAnswer
 } from "./libraries/helpers.js";
 
 // Load environment variables
@@ -55,6 +56,7 @@ program
     console.log("Dumping answers.");
 
     const answers = await getVettedAnswers();
+    // console.log(answers);
 
     let categories = await getAttributeValues(answers, "field_category");
 
@@ -69,10 +71,12 @@ program
       let fileStream = getStreamWriter(filename, "w", "0666");
 
       filteredAnswers.forEach((answer) => {
+        let selected = selectedAnswer(answer);
         fileStream.write("---" + "\n");
         fileStream.write("nid: " + answer.nid + "\n");
         fileStream.write("category: " + answer.field_category + "\n");
         fileStream.write("question: " + answer.field_enter_question + "\n");
+        fileStream.write("answer: " + selected + "\n\n");
       });
       fileStream.end();
     });
